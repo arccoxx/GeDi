@@ -1,12 +1,11 @@
 import numpy as np
 import csv
 import random
-import pandas as pd
 
 
 
 
-def proc_and_binarize(dir, topics):
+def proc_and_binarize(dir):
     fid = open(dir+ "/train.tsv")
     train= fid.read()
     train = train.split("\n")[:-1]
@@ -14,20 +13,7 @@ def proc_and_binarize(dir, topics):
     fid = open(dir+ "/dev.tsv")
     test = fid.read()
     test = test.split("\n")[:-1]
-    topics_pre = topics
-    topics = []
-    for t in topics_pre:
-        topics.append(t.lower())
-    print(topics)
-    #topics = ['ARTS', 'BUSINESS', 'TRAVEL', 'POLITICS', 'EDUCATION',
-       #'ENTERTAINMENT', 'GREEN', 'TECH', 'THE WORLDPOST', 'RELIGION',
-       #'PARENTING', 'WOMEN', 'WELLNESS', 'HEALTHY LIVING', 'WORLD NEWS',
-       #'BLACK VOICES', 'HOME & LIVING', 'FOOD & DRINK', 'PARENTS',
-       #'DIVORCE', 'SCIENCE', 'QUEER VOICES', 'COMEDY', 'STYLE & BEAUTY',
-       #'WEDDINGS', 'ARTS & CULTURE', 'IMPACT', 'CRIME', 'WEIRD NEWS',
-       #'MEDIA', 'COLLEGE', 'TASTE', 'STYLE', 'MONEY', 'CULTURE & ARTS',
-       #'SPORTS', 'WORLDPOST', 'FIFTY', 'GOOD NEWS', 'ENVIRONMENT',
-       #'LATINO VOICES']
+    topics = ["world","sports","business","science"]
 
     true_test = []
     false_test = []
@@ -43,14 +29,14 @@ def proc_and_binarize(dir, topics):
         label = line[0]
 
 
-        if not(len(line) ==2):
+        if not(len(line) ==3):
             print("skipping " +str(i))
             continue
 
         if label[0] =="\"":
             label = label[1:-1]
-        #label = int(label)-1
-        text = line[1]
+        label = int(label)-1
+        text = line[2]
         if text[0] =="\"":
             text = text[1:-1]
         if text[0] == " ":
@@ -58,22 +44,18 @@ def proc_and_binarize(dir, topics):
 
 
 
-        #choice_array = range_arr[:label]+range_arr[label+1:]
-        choice_array = [topic for topic in topics if topic != label]
+        choice_array = range_arr[:label]+range_arr[label+1:]
         ps_label = random.choice(choice_array)
 
-        try:
-            true_ex = line[0] + text
-        except:
-            print('label: ' + str(label) + ' text: ' + str(text) + ' ' + str(topics))
-        false_ex = ps_label  + text
+        true_ex = topics[label] + text
+        false_ex = topics[ps_label]  + text
         true_test.append(true_ex)
         false_test.append(false_ex)
 
     for i in range(0,len(train)):
         line = train[i].split('\t')
 
-        if not(len(line) ==2):
+        if not(len(line) ==3):
             print("skipping " +str(i))
             continue
 
@@ -82,19 +64,19 @@ def proc_and_binarize(dir, topics):
         label = line[0]
         if label[0] =="\"":
             label = label[1:-1]
-        
-        text = line[1]
+        label = int(label)-1
+        text = line[2]
         if text[0] =="\"":
             text = text[1:-1]
 
         if text[0] == " ":
             text = text[1:]
 
-        choice_array = [topic for topic in topics if topic != label]
+        choice_array = range_arr[:label]+range_arr[label+1:]
         ps_label = random.choice(choice_array)
 
-        true_ex = label +  text
-        false_ex = ps_label +  text
+        true_ex = topics[label] +  text
+        false_ex = topics[ps_label] +  text
         true_train.append(true_ex)
         false_train.append(false_ex)
 
@@ -102,23 +84,21 @@ def proc_and_binarize(dir, topics):
 
 def main():
 
-    fid = open("data/train.csv")
-    topics_frame = pd.read_csv('data/train.csv')
-    topics = topics_frame[topics_frame.columns[0]].unique()
+    fid = open("data/AG-news/train.csv")
 
     text_train = fid.read()
 
 
-    fid  = open("data/test.csv")
+    fid  = open("data/AG-news/test.csv")
     text_test = fid.read()
     fid.close()
 
 
-    csv.writer(open("data/train.tsv", 'w+'), delimiter='\t').writerows(csv.reader(open("data/train.csv")))
-    csv.writer(open("data/dev.tsv", 'w+'), delimiter='\t').writerows(csv.reader(open("data/test.csv")))
+    csv.writer(open("data/AG-news/train.tsv", 'w+'), delimiter='\t').writerows(csv.reader(open("data/AG-news/train.csv")))
+    csv.writer(open("data/AG-news/dev.tsv", 'w+'), delimiter='\t').writerows(csv.reader(open("data/AG-news/test.csv")))
 
 
-    true_train, false_train, true_test, false_test = proc_and_binarize("data/AG-news", topics)
+    true_train, false_train, true_test, false_test = proc_and_binarize("data/AG-news")
     random.shuffle(true_train)
     random.shuffle(false_train)
     random.shuffle(true_test)
@@ -149,11 +129,11 @@ def main():
     test_split_all= "\n" + "".join(test_lines)
 
 
-    fid = open("data/train.tsv",'w')
+    fid = open("data/AG-news/train.tsv",'w')
     fid.write(train_split_all)
     fid.close()
 
-    fid = open("data/dev.tsv",'w')
+    fid = open("data/AG-news/dev.tsv",'w')
     fid.write(test_split_all)
     fid.close()
 
