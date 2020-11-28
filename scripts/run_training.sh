@@ -10,7 +10,7 @@ python ../train_GeDi.py --task_name SST-2 \
   --do_train \
   --logit_scale \
   --data_dir ../data  \
-  --max_seq_length 1024 \
+  --max_seq_length 712 \
   --overwrite_cache \
   --per_gpu_train_batch_size 1 \
   --per_gpu_eval_batch_size  1 \
