@@ -118,7 +118,7 @@ def main():
     csv.writer(open("data/dev.tsv", 'w+'), delimiter='\t').writerows(csv.reader(open("data/test.csv")))
 
 
-    true_train, false_train, true_test, false_test = proc_and_binarize("data/AG-news", topics)
+    true_train, false_train, true_test, false_test = proc_and_binarize("data/", topics)
     random.shuffle(true_train)
     random.shuffle(false_train)
     random.shuffle(true_test)
